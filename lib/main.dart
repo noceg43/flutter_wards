@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_background/flutter_background.dart';
+import 'package:english_words/english_words.dart';
 
 void main() {
   runApp(const MyApp());
@@ -7,109 +10,136 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+  final androidConfig = const FlutterBackgroundAndroidConfig(
+    notificationTitle: "flutter_background example app",
+    notificationText: "Background notification for keeping the example app running in the background",
+    notificationImportance: AndroidNotificationImportance.Default,
+    notificationIcon: AndroidResource(name: 'background_icon', defType: 'drawable'), // Default is ic_launcher from folder mipmap
+  );
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+    return const MaterialApp(
+      title: 'Welcome to Flutter',
+      home: Scaffold(
+        body: AnimatedGradient()
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
+      );
+  }
+}
+
+class AnimatedGradient extends StatefulWidget {
+  const AnimatedGradient({Key? key}) : super(key: key);
+
+  @override
+  _AnimatedGradientState createState() => _AnimatedGradientState();
+}
+
+class _AnimatedGradientState extends State<AnimatedGradient> {
+
+
+  List<Color> colorList = [
+    Colors.red,
+    Colors.blue,
+    Colors.green,
+    Colors.yellow
+  ];
+  List<Alignment> alignmentList = [
+    Alignment.bottomLeft,
+    Alignment.bottomRight,
+    Alignment.topRight,
+    Alignment.topLeft,
+  ];
+  int index = 0;
+  Color bottomColor = Colors.red;
+  Color topColor = Colors.yellow;
+  Alignment begin = Alignment.bottomLeft;
+  Alignment end = Alignment.topRight;
+  @override
+
+  @override
+  void initState() {
+    super.initState();
+    // Rebuild the screen after 3s which will process the animation from green to blue
+    Future.delayed(Duration(seconds: 1)).then((value) => setState(() {
+      bottomColor = Colors.blue;
+    }));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+
+        body: Stack(
+          children: [
+            AnimatedContainer(
+              duration: Duration(seconds: 2),
+              onEnd: () {
+                setState(() {
+                  index = index + 1;
+                  // animate the color
+                  bottomColor = colorList[index % colorList.length];
+                  topColor = colorList[(index + 1) % colorList.length];
+
+                  //// animate the alignment
+                   begin = alignmentList[index % alignmentList.length];
+                   end = alignmentList[(index + 2) % alignmentList.length];
+                   bottomColor = Colors.blue;
+                });
+              },
+              decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                      begin: begin, end: end, colors: [bottomColor, topColor])),
+            ),
+
+            Center  (
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    elevation: 0,
+                    primary: Colors.transparent,
+                    side: BorderSide(color: Colors.white.withOpacity(1), width: 15),
+
+                    shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(75),
+                    ),
+                ),
+                onPressed: () {
+                  _launchURLS();
+                },
+                child: Icon(
+                  Icons.search_rounded,
+                  size: 250,
+                  color: Colors.white.withOpacity(0.8),
+                )
+              ),
+            )
+
+          ],
+        ));
+  }
+
+}
+
+
+
+
+
+
+
+
+
+_launchURLS() async {
+  FlutterBackground.enableBackgroundExecution();
+  var words = generateWordPairs().take(35);
+  String url;
+  for(var i in words) {
+    // "https://www.google.com/search?q="
+    // "https://www.bing.com/search?q="
+    url = "https://www.bing.com/search?q=" + i.toString();
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url)';
+    }
   }
 }
